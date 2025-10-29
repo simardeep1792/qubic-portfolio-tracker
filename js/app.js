@@ -412,18 +412,21 @@ class QubicPortfolioApp {
                     <tbody>
                         ${transactions.map(tx => `
                             <tr>
-                                <td class="${tx.type === 'incoming' ? 'tx-incoming' : 'tx-outgoing'}">
+                                <td data-label="Type" class="${tx.type === 'incoming' ? 'tx-incoming' : 'tx-outgoing'}">
                                     <strong>${tx.type === 'incoming' ? '↓ IN' : '↑ OUT'}</strong>
                                 </td>
-                                <td style="font-weight: bold;">
-                                    ${tx.type === 'incoming' ? '+' : '-'}${tx.amount.toLocaleString()}
+                                <td data-label="Amount" style="font-weight: bold;">
+                                    ${tx.type === 'incoming' ? '+' : '-'}${tx.amount.toLocaleString()} QU
                                 </td>
-                                <td style="font-family: monospace; font-size: 11px;">
+                                <td data-label="Counterparty" style="font-family: monospace; font-size: 11px;">
                                     ${this.truncateAddress(tx.type === 'incoming' ? tx.sourceId : tx.destId)}
                                 </td>
-                                <td>${tx.tick.toLocaleString()}</td>
-                                <td>
-                                    <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${tx.moneyFlew ? 'var(--success)' : 'var(--danger)'};"></span>
+                                <td data-label="Tick">${tx.tick.toLocaleString()}</td>
+                                <td data-label="Status">
+                                    <span style="display: inline-flex; align-items: center; gap: 4px;">
+                                        <span style="display: inline-block; width: 8px; height: 8px; border-radius: 50%; background: ${tx.moneyFlew ? 'var(--success)' : 'var(--danger)'};"></span>
+                                        <span style="font-size: 12px;">${tx.moneyFlew ? 'Success' : 'Failed'}</span>
+                                    </span>
                                 </td>
                             </tr>
                         `).join('')}

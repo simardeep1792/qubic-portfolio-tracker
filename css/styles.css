@@ -665,87 +665,334 @@ h1 {
 
 /* Mobile Responsive */
 @media (max-width: 768px) {
+    /* Layout adjustments */
     .container {
-        padding: var(--space-md);
+        padding: var(--space-sm);
     }
     
     .header {
-        padding: var(--space-lg);
+        padding: var(--space-md);
     }
     
     h1 {
-        font-size: 24px;
+        font-size: 22px;
+        text-align: center;
     }
     
     .header-top {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: center;
         gap: var(--space-md);
+        text-align: center;
     }
     
+    /* Enhanced wallet input for mobile */
     .wallet-input-section {
         flex-direction: column;
         align-items: stretch;
+        gap: var(--space-md);
     }
     
     .wallet-input-group {
         min-width: unset;
+        flex-direction: column;
+        gap: var(--space-sm);
+    }
+    
+    .wallet-input {
+        font-size: 16px; /* Prevents zoom on iOS */
+        padding: var(--space-md);
+    }
+    
+    .btn {
+        padding: var(--space-md);
+        justify-content: center;
+        min-height: 44px; /* Touch target */
+    }
+    
+    .recent-wallets-container {
+        width: 100%;
     }
     
     .recent-wallets-dropdown {
         min-width: 100%;
         left: 0;
         right: 0;
+        max-height: 60vh;
+        overflow-y: auto;
     }
     
+    /* Wallet info improvements */
     .wallet-info {
         flex-direction: column;
-        align-items: flex-start;
+        align-items: stretch;
+        gap: var(--space-sm);
+        text-align: center;
     }
     
+    .wallet-address-container {
+        justify-content: center;
+        flex-wrap: wrap;
+    }
+    
+    .wallet-address {
+        font-size: 11px;
+        word-break: break-all;
+    }
+    
+    /* Better tab navigation for mobile */
     .tabs {
-        flex-direction: column;
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 2px;
     }
     
     .tab {
+        padding: var(--space-md);
+        font-size: 14px;
         border-bottom: none;
-        border-left: 3px solid transparent;
+        border-left: none;
+        min-height: 48px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
     }
     
     .tab.active {
-        border-bottom: none;
-        border-left: 3px solid var(--primary);
+        border-bottom: 3px solid var(--primary);
+        border-left: none;
     }
     
+    /* Card layouts for mobile */
     .balance-overview {
         grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+    
+    .balance-card {
+        padding: var(--space-lg);
+        text-align: center;
+    }
+    
+    .balance-amount {
+        font-size: 28px;
     }
     
     .asset-grid {
         grid-template-columns: 1fr;
+        gap: var(--space-md);
+    }
+    
+    .asset-item {
+        padding: var(--space-md);
+        min-height: 60px;
+        display: flex;
+        align-items: center;
+    }
+    
+    .asset-header {
+        flex: 1;
     }
     
     .analytics-grid {
         grid-template-columns: repeat(2, 1fr);
+        gap: var(--space-sm);
     }
     
-    .controls {
+    .analytics-card {
+        padding: var(--space-md);
+        min-height: 80px;
+        display: flex;
         flex-direction: column;
-        align-items: stretch;
+        justify-content: center;
     }
     
-    .toast-container {
-        left: var(--space-md);
-        right: var(--space-md);
-        bottom: var(--space-md);
+    .analytics-value {
+        font-size: 20px;
     }
     
-    .transaction-table {
+    .analytics-label {
         font-size: 12px;
     }
     
+    /* Transaction table mobile optimization */
+    .transaction-table {
+        font-size: 11px;
+        display: block;
+        overflow-x: auto;
+        white-space: nowrap;
+    }
+    
+    .transaction-table thead,
+    .transaction-table tbody,
     .transaction-table th,
+    .transaction-table td,
+    .transaction-table tr {
+        display: block;
+    }
+    
+    .transaction-table thead tr {
+        position: absolute;
+        top: -9999px;
+        left: -9999px;
+    }
+    
+    .transaction-table tr {
+        background: white;
+        border: 1px solid var(--gray-200);
+        border-radius: var(--radius-md);
+        padding: var(--space-md);
+        margin-bottom: var(--space-sm);
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-xs);
+    }
+    
     .transaction-table td {
+        border: none;
+        position: relative;
+        padding: var(--space-xs) 0;
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+    }
+    
+    .transaction-table td:before {
+        content: attr(data-label);
+        font-weight: 600;
+        color: var(--gray-600);
+        font-size: 12px;
+    }
+    
+    /* Controls and footer */
+    .controls {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-md);
+        padding: var(--space-md) 0;
+    }
+    
+    .last-update {
+        text-align: center;
+        font-size: 12px;
+    }
+    
+    /* Toast notifications */
+    .toast-container {
+        left: var(--space-sm);
+        right: var(--space-sm);
+        bottom: var(--space-sm);
+    }
+    
+    .toast {
+        padding: var(--space-md);
+        font-size: 14px;
+    }
+    
+    /* Filters */
+    .filters {
+        flex-direction: column;
+        gap: var(--space-sm);
+        align-items: stretch;
+    }
+    
+    .filter-select {
+        width: 100%;
+        padding: var(--space-md);
+        font-size: 16px;
+    }
+    
+    /* Chart containers */
+    #portfolio-chart,
+    #transactions-container {
+        overflow-x: auto;
+    }
+    
+    /* Fix for chart responsiveness */
+    canvas {
+        max-width: 100% !important;
+        height: auto !important;
+    }
+    
+    /* Empty states */
+    .empty-state {
+        padding: var(--space-xl);
+    }
+    
+    .empty-state svg {
+        width: 48px;
+        height: 48px;
+    }
+    
+    .empty-state h2 {
+        font-size: 20px;
+    }
+    
+    .empty-state p {
+        font-size: 14px;
+    }
+}
+
+/* Extra small screens */
+@media (max-width: 480px) {
+    .container {
+        padding: var(--space-xs);
+    }
+    
+    .header {
         padding: var(--space-sm);
+    }
+    
+    h1 {
+        font-size: 20px;
+    }
+    
+    .tabs {
+        grid-template-columns: 1fr 1fr;
+        font-size: 12px;
+    }
+    
+    .tab {
+        padding: var(--space-sm);
+        min-height: 44px;
+    }
+    
+    .balance-amount {
+        font-size: 24px;
+    }
+    
+    .analytics-grid {
+        grid-template-columns: 1fr;
+    }
+    
+    .wallet-input {
+        font-size: 14px;
+    }
+    
+    .asset-name {
+        font-size: 16px;
+    }
+    
+    .asset-amount {
+        font-size: 16px;
+    }
+}
+
+/* Landscape mobile orientation */
+@media (max-width: 768px) and (orientation: landscape) {
+    .header {
+        padding: var(--space-sm);
+    }
+    
+    .tabs {
+        grid-template-columns: repeat(4, 1fr);
+    }
+    
+    .balance-overview {
+        grid-template-columns: repeat(2, 1fr);
+    }
+    
+    .analytics-grid {
+        grid-template-columns: repeat(4, 1fr);
     }
 }

@@ -111,6 +111,15 @@ h1 {
     50% { opacity: 0.5; }
 }
 
+@keyframes spin {
+    from { transform: rotate(0deg); }
+    to { transform: rotate(360deg); }
+}
+
+.btn.loading .btn-icon {
+    animation: spin 1s linear infinite;
+}
+
 /* Wallet Input Section */
 .wallet-input-section {
     display: flex;

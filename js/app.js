@@ -78,12 +78,20 @@ class QubicPortfolioApp {
         });
 
         // Refresh buttons
-        document.getElementById('refresh-all-btn').addEventListener('click', () => {
-            this.loadAllData();
+        document.getElementById('refresh-all-btn').addEventListener('click', (e) => {
+            e.target.classList.add('loading');
+            this.showToast('Refreshing all data...', 'info');
+            this.loadAllData().finally(() => {
+                e.target.classList.remove('loading');
+            });
         });
 
-        document.getElementById('refresh-tx-btn').addEventListener('click', () => {
-            this.loadTransactions();
+        document.getElementById('refresh-tx-btn').addEventListener('click', (e) => {
+            e.target.classList.add('loading');
+            this.showToast('Refreshing transactions...', 'info');
+            this.loadTransactions().finally(() => {
+                e.target.classList.remove('loading');
+            });
         });
 
         // Transaction filter
@@ -304,8 +312,17 @@ class QubicPortfolioApp {
 
             // Load transactions if tab is active
             const activeTab = document.querySelector('.tab-pane.active').id;
-            if (activeTab === 'transactions-tab') {
+            if (activeTab === 'transactions-tab' || activeTab === 'analytics-tab') {
                 await this.loadTransactions();
+            }
+            
+            // Clear API cache to ensure fresh data on next refresh
+            qubicAPI.clearCache();
+            
+            // Show success message for manual refresh
+            if (!this.refreshInterval || Date.now() - (this.lastAutoRefresh || 0) > 25000) {
+                this.showToast('Portfolio data updated!', 'success');
+                this.lastAutoRefresh = Date.now();
             }
 
         } catch (error) {

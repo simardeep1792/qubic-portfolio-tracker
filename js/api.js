@@ -1,6 +1,9 @@
 /**
  * Qubic API Client Module
  * Handles all API interactions with the Qubic RPC endpoints
+ * 
+ * SECURITY NOTE: This only makes READ-ONLY calls to public blockchain data.
+ * No private keys, no signing, no transactions - just reading public info.
  */
 
 class QubicAPI {

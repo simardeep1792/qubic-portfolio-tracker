@@ -112,16 +112,26 @@ class QubicPortfolioApp {
             return;
         }
 
-        if (wallet.length < 50) {
-            this.showToast('Invalid wallet address format', 'error');
+        // Basic validation for Qubic wallet format
+        if (wallet.length !== 60) {
+            this.showToast('Qubic wallet addresses must be exactly 60 characters', 'error');
             return;
         }
 
+        // Check for valid characters (A-Z only for Qubic addresses)
+        if (!/^[A-Z]+$/.test(wallet)) {
+            this.showToast('Invalid wallet address format - only uppercase letters allowed', 'error');
+            return;
+        }
+
+        // Sanitize input to prevent any injection
+        const sanitizedWallet = wallet.replace(/[^A-Z]/g, '');
+        
         // Save to history
-        storage.addWallet(wallet);
+        storage.addWallet(sanitizedWallet);
         
         // Set as current wallet
-        this.setCurrentWallet(wallet);
+        this.setCurrentWallet(sanitizedWallet);
         
         // Clear input
         input.value = '';

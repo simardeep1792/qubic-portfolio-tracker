@@ -874,6 +874,21 @@ h1 {
     font-size: 14px;
 }
 
+/* Privacy Notice */
+.privacy-notice {
+    margin-top: var(--space-lg);
+    padding: var(--space-md);
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: var(--radius-md);
+    text-align: center;
+}
+
+.privacy-notice p {
+    color: var(--gray-600);
+    font-size: 12px;
+    margin: 0;
+}
+
 /* Mobile Responsive */
 @media (max-width: 768px) {
     /* Layout adjustments */

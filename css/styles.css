@@ -50,7 +50,8 @@
 
 body {
     font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    background: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     min-height: 100vh;
     color: var(--gray-700);
     line-height: 1.6;
@@ -216,7 +217,7 @@ h1 {
 
 .recent-wallets-dropdown {
     position: absolute;
-    top: calc(100% + var(--space-sm));
+    top: calc(100% + 8px);
     right: 0;
     background: white;
     border-radius: var(--radius-lg);
@@ -425,7 +426,8 @@ h1 {
 }
 
 .balance-card {
-    background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+    background: #667eea;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
     color: white;
     padding: var(--space-xl);
     border-radius: var(--radius-lg);

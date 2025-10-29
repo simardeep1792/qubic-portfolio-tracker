@@ -484,47 +484,192 @@ class QubicPortfolioApp {
     }
 
     /**
-     * Update analytics
+     * Update analytics with enhanced insights
      */
     updateAnalytics(transactions) {
-        const stats = this.calculateTransactionStats(transactions);
-        
-        document.getElementById('total-transactions').textContent = transactions.length;
-        document.getElementById('incoming-count').textContent = stats.incoming;
-        document.getElementById('outgoing-count').textContent = stats.outgoing;
+        // Set data for advanced analytics
+        advancedAnalytics.setData(this.portfolioData, transactions, this.assets);
+        const analytics = advancedAnalytics.getAnalyticsSummary();
 
-        // Create charts
-        const chartContainer = document.getElementById('portfolio-chart');
+        // Update portfolio health metrics
+        this.updatePortfolioHealth(analytics);
         
-        if (this.assets.length > 0) {
-            chartContainer.innerHTML = `
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 30px; height: 300px;">
-                    <div>
-                        <h4 style="margin-bottom: 15px;">Transaction Flow</h4>
-                        <canvas id="flowChart" style="max-height: 250px;"></canvas>
+        // Update transaction analytics
+        this.updateTransactionAnalytics(analytics, transactions);
+        
+        // Update insights
+        this.updateInsights(analytics.insights);
+        
+        // Update visualizations
+        this.updateEnhancedCharts(analytics, transactions);
+        
+        // Update top counterparties
+        this.updateTopCounterparties(analytics.patterns.topCounterparties);
+    }
+
+    /**
+     * Update portfolio health section
+     */
+    updatePortfolioHealth(analytics) {
+        // Diversity Score
+        document.getElementById('diversity-score').textContent = `${analytics.diversity}/100`;
+        const diversityTrend = document.getElementById('diversity-trend');
+        diversityTrend.textContent = analytics.diversity > 60 ? 'Good' : analytics.diversity > 30 ? 'Fair' : 'Poor';
+        diversityTrend.className = `analytics-trend ${analytics.diversity > 60 ? 'positive' : analytics.diversity > 30 ? 'neutral' : 'negative'}`;
+
+        // Concentration Risk
+        document.getElementById('concentration-risk').textContent = analytics.concentration.level;
+        const riskTrend = document.getElementById('risk-trend');
+        riskTrend.textContent = `${analytics.concentration.percentage}% in ${analytics.concentration.topAsset}`;
+        riskTrend.className = `analytics-trend ${analytics.concentration.level === 'Very Low' || analytics.concentration.level === 'Low' ? 'positive' : analytics.concentration.level === 'Medium' ? 'neutral' : 'negative'}`;
+
+        // Activity Pattern
+        document.getElementById('activity-pattern').textContent = analytics.patterns.pattern;
+        const activityTrend = document.getElementById('activity-trend');
+        activityTrend.textContent = `${analytics.patterns.frequency}/day`;
+        activityTrend.className = 'analytics-trend neutral';
+
+        // Network Utilization
+        document.getElementById('network-utilization').textContent = analytics.network.networkUtilization;
+        const networkTrend = document.getElementById('network-trend');
+        networkTrend.textContent = `${analytics.network.averageTicksPerTx} ticks/tx`;
+        networkTrend.className = `analytics-trend ${analytics.network.networkUtilization === 'High' ? 'positive' : 'neutral'}`;
+    }
+
+    /**
+     * Update transaction analytics section
+     */
+    updateTransactionAnalytics(analytics, transactions) {
+        document.getElementById('total-transactions').textContent = transactions.length;
+        document.getElementById('avg-tx-amount').textContent = `${analytics.patterns.averageAmount.toLocaleString()} QU`;
+        document.getElementById('tx-frequency').textContent = `${analytics.patterns.frequency}/day`;
+        document.getElementById('current-tick').textContent = this.portfolioData?.networkStatus?.currentTick?.toLocaleString() || '-';
+    }
+
+    /**
+     * Update insights section
+     */
+    updateInsights(insights) {
+        const container = document.getElementById('portfolio-insights');
+        
+        if (!insights || insights.length === 0) {
+            container.innerHTML = `
+                <div class="insight-card success">
+                    <div class="insight-header">
+                        <div class="insight-icon success">✓</div>
+                        <div class="insight-title">Portfolio Analysis Complete</div>
                     </div>
-                    <div>
-                        <h4 style="margin-bottom: 15px;">Asset Distribution</h4>
-                        <canvas id="assetDistributionChart" style="max-height: 250px;"></canvas>
+                    <div class="insight-message">
+                        Your portfolio appears to be in good shape. No immediate concerns detected.
                     </div>
-                </div>
-                <div style="margin-top: 40px;">
-                    <h4 style="margin-bottom: 15px;">Balance Timeline</h4>
-                    <div style="height: 300px;">
-                        <canvas id="balanceChart"></canvas>
-                    </div>
+                    <div class="insight-action">Continue monitoring</div>
                 </div>
             `;
-
-            // Create charts after DOM update
-            setTimeout(() => {
-                chartManager.createFlowChart(transactions);
-                chartManager.createAssetDistributionChart(this.assets);
-                chartManager.createBalanceChart(transactions, this.portfolioData.balance);
-            }, 100);
-        } else {
-            chartContainer.innerHTML = '<div class="empty-state">No data to analyze</div>';
+            return;
         }
+
+        container.innerHTML = insights.map(insight => `
+            <div class="insight-card ${insight.type}">
+                <div class="insight-header">
+                    <div class="insight-icon ${insight.type}">
+                        ${insight.type === 'warning' ? '⚠' : insight.type === 'success' ? '✓' : 'ℹ'}
+                    </div>
+                    <div class="insight-title">${insight.title}</div>
+                </div>
+                <div class="insight-message">${insight.message}</div>
+                <div class="insight-action">${insight.action}</div>
+            </div>
+        `).join('');
+    }
+
+    /**
+     * Update enhanced charts
+     */
+    updateEnhancedCharts(analytics, transactions) {
+        setTimeout(() => {
+            // Real Balance Timeline
+            if (analytics.timeline.labels.length > 0) {
+                chartManager.getChart('enhanced-balance-chart', 'line', {
+                    labels: analytics.timeline.labels,
+                    datasets: [{
+                        label: 'QU Balance',
+                        data: analytics.timeline.balances,
+                        borderColor: '#667eea',
+                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                        tension: 0.4,
+                        fill: true
+                    }]
+                }, {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            ticks: {
+                                callback: (value) => value.toLocaleString() + ' QU'
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                });
+            }
+
+            // Asset Performance Chart
+            if (analytics.performance.length > 0) {
+                const performanceData = analytics.performance.slice(0, 8); // Top 8 assets
+                chartManager.getChart('asset-performance-chart', 'bar', {
+                    labels: performanceData.map(p => p.name),
+                    datasets: [{
+                        label: 'Asset Amount',
+                        data: performanceData.map(p => p.amount),
+                        backgroundColor: ['#667eea', '#764ba2', '#48bb78', '#ed8936', '#f56565', '#9f7aea', '#38b2ac', '#ed64a6']
+                    }]
+                }, {
+                    responsive: true,
+                    scales: {
+                        y: {
+                            beginAtZero: true,
+                            ticks: {
+                                callback: (value) => value.toLocaleString()
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: { display: false }
+                    }
+                });
+            }
+
+            // Portfolio Distribution
+            if (this.assets.length > 0) {
+                chartManager.createAssetDistributionChart(this.assets.slice(0, 10));
+            }
+
+            // Transaction Flow
+            if (transactions.length > 0) {
+                chartManager.createFlowChart(transactions);
+            }
+        }, 100);
+    }
+
+    /**
+     * Update top counterparties section
+     */
+    updateTopCounterparties(counterparties) {
+        const container = document.getElementById('top-counterparties');
+        
+        if (!counterparties || counterparties.length === 0) {
+            container.innerHTML = '<div class="empty-state">No trading partners found</div>';
+            return;
+        }
+
+        container.innerHTML = counterparties.map(cp => `
+            <div class="counterparty-item">
+                <div class="counterparty-address">${cp.address}</div>
+                <div class="counterparty-count">${cp.transactions} txs</div>
+            </div>
+        `).join('');
     }
 
     /**

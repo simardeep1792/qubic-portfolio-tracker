@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Qubic Portfolio Tracker</title>
+    <meta name="description" content="Track your Qubic (QU) cryptocurrency portfolio, assets, and transactions">
+    <link rel="stylesheet" href="css/styles.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body>
+    <div class="container">
+        <!-- Header with Wallet Management -->
+        <div class="header">
+            <div class="header-top">
+                <h1>Qubic Portfolio Tracker</h1>
+                <div class="refresh-indicator" id="refresh-indicator">
+                    <span class="refresh-dot"></span>
+                    <span class="refresh-text">Live</span>
+                </div>
+            </div>
+            
+            <!-- Wallet Input Section -->
+            <div class="wallet-input-section">
+                <div class="wallet-input-group">
+                    <input 
+                        type="text" 
+                        id="wallet-input" 
+                        class="wallet-input" 
+                        placeholder="Enter Qubic wallet address..."
+                        maxlength="100"
+                    >
+                    <button id="add-wallet-btn" class="btn btn-primary">
+                        <span class="btn-icon">+</span>
+                        Add Wallet
+                    </button>
+                </div>
+                
+                <!-- Recent Wallets Dropdown -->
+                <div class="recent-wallets-container">
+                    <button id="recent-wallets-btn" class="btn btn-secondary">
+                        <span class="btn-icon">⏱</span>
+                        Recent Wallets
+                        <span class="wallet-count" id="wallet-count">0</span>
+                    </button>
+                    <div class="recent-wallets-dropdown" id="recent-wallets-dropdown">
+                        <div class="dropdown-header">
+                            <h3>Recent Wallets</h3>
+                            <button id="clear-history-btn" class="btn-text">Clear All</button>
+                        </div>
+                        <div class="wallet-list" id="wallet-list">
+                            <!-- Wallet items will be added here -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Current Wallet Info -->
+            <div class="wallet-info" id="wallet-info" style="display: none;">
+                <div class="wallet-address-container">
+                    <span class="wallet-label">Current Wallet:</span>
+                    <span class="wallet-address" id="wallet-address">-</span>
+                    <button class="copy-btn" id="copy-wallet-btn" title="Copy wallet address">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="9" y="9" width="13" height="13" rx="2" ry="2"/>
+                            <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/>
+                        </svg>
+                    </button>
+                </div>
+                <div class="network-status" id="network-status">
+                    <span class="status-dot"></span>
+                    <span id="network-text">Connecting...</span>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Main Content Area -->
+        <div class="main-content" id="main-content" style="display: none;">
+            <!-- Tabs -->
+            <div class="tabs">
+                <button class="tab active" data-tab="portfolio">Portfolio</button>
+                <button class="tab" data-tab="transactions">Transactions</button>
+                <button class="tab" data-tab="analytics">Analytics</button>
+                <button class="tab" data-tab="assets">Asset Details</button>
+            </div>
+            
+            <div class="tab-content">
+                <!-- Portfolio Tab -->
+                <div class="tab-pane active" id="portfolio-tab">
+                    <div class="balance-overview">
+                        <div class="balance-card">
+                            <div class="balance-label">Qubic Balance</div>
+                            <div class="balance-amount" id="qu-balance">
+                                <span class="skeleton">Loading...</span>
+                            </div>
+                        </div>
+                        <div class="balance-card">
+                            <div class="balance-label">Assets Held</div>
+                            <div class="balance-amount" id="asset-count">
+                                <span class="skeleton">-</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <h3>Token Holdings</h3>
+                    <div class="asset-grid" id="assets-grid">
+                        <div class="loading">Loading assets...</div>
+                    </div>
+                </div>
+                
+                <!-- Transactions Tab -->
+                <div class="tab-pane" id="transactions-tab">
+                    <div class="filters">
+                        <select class="filter-select" id="tx-filter">
+                            <option value="all">All Transactions</option>
+                            <option value="incoming">Incoming</option>
+                            <option value="outgoing">Outgoing</option>
+                        </select>
+                        <button class="btn btn-secondary" id="refresh-tx-btn">
+                            <span class="btn-icon">↻</span>
+                            Refresh
+                        </button>
+                    </div>
+                    
+                    <div id="transactions-container">
+                        <div class="loading">Loading transactions...</div>
+                    </div>
+                </div>
+                
+                <!-- Analytics Tab -->
+                <div class="tab-pane" id="analytics-tab">
+                    <div class="analytics-grid">
+                        <div class="analytics-card">
+                            <div class="analytics-value" id="total-transactions">-</div>
+                            <div class="analytics-label">Total Transactions</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-value" id="incoming-count">-</div>
+                            <div class="analytics-label">Incoming</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-value" id="outgoing-count">-</div>
+                            <div class="analytics-label">Outgoing</div>
+                        </div>
+                        <div class="analytics-card">
+                            <div class="analytics-value" id="current-tick">-</div>
+                            <div class="analytics-label">Current Tick</div>
+                        </div>
+                    </div>
+                    
+                    <h3>Portfolio Distribution</h3>
+                    <div id="portfolio-chart">
+                        <div class="loading">Analyzing portfolio...</div>
+                    </div>
+                </div>
+                
+                <!-- Asset Details Tab -->
+                <div class="tab-pane" id="assets-tab">
+                    <div id="asset-details">
+                        <div class="empty-state">
+                            <svg width="48" height="48" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="11" cy="11" r="8"/>
+                                <path d="m21 21-4.35-4.35"/>
+                            </svg>
+                            <p>Select an asset from the Portfolio tab to view details</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer Controls -->
+            <div class="controls">
+                <button class="btn" id="refresh-all-btn">
+                    <span class="btn-icon">↻</span>
+                    Refresh All Data
+                </button>
+                <div class="last-update" id="last-update">Never</div>
+            </div>
+        </div>
+        
+        <!-- Empty State (shown when no wallet selected) -->
+        <div class="empty-state-container" id="empty-state">
+            <div class="empty-state">
+                <svg width="64" height="64" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                    <path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/>
+                    <polyline points="3.27 6.96 12 12.01 20.73 6.96"/>
+                    <line x1="12" y1="22.08" x2="12" y2="12"/>
+                </svg>
+                <h2>Welcome to Qubic Portfolio Tracker</h2>
+                <p>Enter a wallet address above or select from your recent wallets to get started</p>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Toast Notifications Container -->
+    <div class="toast-container" id="toast-container"></div>
+    
+    <!-- Load JavaScript Modules -->
+    <script src="js/storage.js"></script>
+    <script src="js/api.js"></script>
+    <script src="js/charts.js"></script>
+    <script src="js/app.js"></script>
+</body>
+</html>

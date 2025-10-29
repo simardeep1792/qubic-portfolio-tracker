@@ -1,0 +1,84 @@
+name: Deploy to GitHub Pages
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+concurrency:
+  group: "pages"
+  cancel-in-progress: false
+
+jobs:
+  # Test job
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Validate HTML
+        run: |
+          # Install html5validator
+          pip install html5validator
+          
+          # Validate HTML
+          html5validator --root . --also-check-css --also-check-svg
+
+      - name: Check JavaScript syntax
+        run: |
+          # Basic syntax check for JavaScript files
+          for file in js/*.js; do
+            node -c "$file" || exit 1
+          done
+
+      - name: Check file structure
+        run: |
+          # Ensure required files exist
+          test -f index.html || (echo "index.html missing" && exit 1)
+          test -f css/styles.css || (echo "css/styles.css missing" && exit 1)
+          test -f js/app.js || (echo "js/app.js missing" && exit 1)
+          test -f js/api.js || (echo "js/api.js missing" && exit 1)
+          test -f js/storage.js || (echo "js/storage.js missing" && exit 1)
+          test -f js/charts.js || (echo "js/charts.js missing" && exit 1)
+
+  # Build job
+  build:
+    runs-on: ubuntu-latest
+    needs: test
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup Pages
+        uses: actions/configure-pages@v4
+
+      - name: Optimize assets (optional)
+        run: |
+          # Create a minified version (optional - not required for basic deployment)
+          echo "No build step required for static site"
+
+      - name: Upload artifact
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: .
+
+  # Deployment job
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    if: github.ref == 'refs/heads/main'
+    steps:
+      - name: Deploy to GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4

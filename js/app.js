@@ -487,63 +487,109 @@ class QubicPortfolioApp {
      * Update analytics with enhanced insights
      */
     updateAnalytics(transactions) {
-        // Set data for advanced analytics
-        advancedAnalytics.setData(this.portfolioData, transactions, this.assets);
-        const analytics = advancedAnalytics.getAnalyticsSummary();
+        try {
+            // Check if we're on the analytics tab
+            const analyticsTab = document.getElementById('analytics-tab');
+            if (!analyticsTab || !analyticsTab.classList.contains('active')) {
+                // Just update basic stats for other tabs
+                this.updateBasicStats(transactions);
+                return;
+            }
 
-        // Update portfolio health metrics
-        this.updatePortfolioHealth(analytics);
+            // Set data for advanced analytics
+            advancedAnalytics.setData(this.portfolioData, transactions, this.assets);
+            const analytics = advancedAnalytics.getAnalyticsSummary();
+
+            // Update portfolio health metrics
+            this.updatePortfolioHealth(analytics);
+            
+            // Update transaction analytics
+            this.updateTransactionAnalytics(analytics, transactions);
+            
+            // Update insights
+            this.updateInsights(analytics.insights);
+            
+            // Update visualizations
+            this.updateEnhancedCharts(analytics, transactions);
+            
+            // Update top counterparties
+            this.updateTopCounterparties(analytics.patterns.topCounterparties);
+        } catch (error) {
+            console.error('Error updating analytics:', error);
+            // Fall back to basic stats
+            this.updateBasicStats(transactions);
+        }
+    }
+
+    /**
+     * Update basic stats (fallback)
+     */
+    updateBasicStats(transactions) {
+        const stats = this.calculateTransactionStats(transactions);
         
-        // Update transaction analytics
-        this.updateTransactionAnalytics(analytics, transactions);
-        
-        // Update insights
-        this.updateInsights(analytics.insights);
-        
-        // Update visualizations
-        this.updateEnhancedCharts(analytics, transactions);
-        
-        // Update top counterparties
-        this.updateTopCounterparties(analytics.patterns.topCounterparties);
+        // Safely update basic elements that should always exist
+        const safeUpdate = (id, content) => {
+            const element = document.getElementById(id);
+            if (element) element.textContent = content;
+        };
+
+        safeUpdate('total-transactions', transactions.length);
+        safeUpdate('incoming-count', stats.incoming);
+        safeUpdate('outgoing-count', stats.outgoing);
+        safeUpdate('current-tick', this.portfolioData?.networkStatus?.currentTick?.toLocaleString() || '-');
     }
 
     /**
      * Update portfolio health section
      */
     updatePortfolioHealth(analytics) {
+        // Helper function to safely update element
+        const safeUpdate = (id, content, className = null) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = content;
+                if (className) element.className = className;
+            }
+        };
+
         // Diversity Score
-        document.getElementById('diversity-score').textContent = `${analytics.diversity}/100`;
-        const diversityTrend = document.getElementById('diversity-trend');
-        diversityTrend.textContent = analytics.diversity > 60 ? 'Good' : analytics.diversity > 30 ? 'Fair' : 'Poor';
-        diversityTrend.className = `analytics-trend ${analytics.diversity > 60 ? 'positive' : analytics.diversity > 30 ? 'neutral' : 'negative'}`;
+        safeUpdate('diversity-score', `${analytics.diversity}/100`);
+        const diversityText = analytics.diversity > 60 ? 'Good' : analytics.diversity > 30 ? 'Fair' : 'Poor';
+        const diversityClass = `analytics-trend ${analytics.diversity > 60 ? 'positive' : analytics.diversity > 30 ? 'neutral' : 'negative'}`;
+        safeUpdate('diversity-trend', diversityText, diversityClass);
 
         // Concentration Risk
-        document.getElementById('concentration-risk').textContent = analytics.concentration.level;
-        const riskTrend = document.getElementById('risk-trend');
-        riskTrend.textContent = `${analytics.concentration.percentage}% in ${analytics.concentration.topAsset}`;
-        riskTrend.className = `analytics-trend ${analytics.concentration.level === 'Very Low' || analytics.concentration.level === 'Low' ? 'positive' : analytics.concentration.level === 'Medium' ? 'neutral' : 'negative'}`;
+        safeUpdate('concentration-risk', analytics.concentration.level);
+        const riskText = `${analytics.concentration.percentage}% in ${analytics.concentration.topAsset}`;
+        const riskClass = `analytics-trend ${analytics.concentration.level === 'Very Low' || analytics.concentration.level === 'Low' ? 'positive' : analytics.concentration.level === 'Medium' ? 'neutral' : 'negative'}`;
+        safeUpdate('risk-trend', riskText, riskClass);
 
         // Activity Pattern
-        document.getElementById('activity-pattern').textContent = analytics.patterns.pattern;
-        const activityTrend = document.getElementById('activity-trend');
-        activityTrend.textContent = `${analytics.patterns.frequency}/day`;
-        activityTrend.className = 'analytics-trend neutral';
+        safeUpdate('activity-pattern', analytics.patterns.pattern);
+        safeUpdate('activity-trend', `${analytics.patterns.frequency}/day`, 'analytics-trend neutral');
 
         // Network Utilization
-        document.getElementById('network-utilization').textContent = analytics.network.networkUtilization;
-        const networkTrend = document.getElementById('network-trend');
-        networkTrend.textContent = `${analytics.network.averageTicksPerTx} ticks/tx`;
-        networkTrend.className = `analytics-trend ${analytics.network.networkUtilization === 'High' ? 'positive' : 'neutral'}`;
+        safeUpdate('network-utilization', analytics.network.networkUtilization);
+        const networkClass = `analytics-trend ${analytics.network.networkUtilization === 'High' ? 'positive' : 'neutral'}`;
+        safeUpdate('network-trend', `${analytics.network.averageTicksPerTx} ticks/tx`, networkClass);
     }
 
     /**
      * Update transaction analytics section
      */
     updateTransactionAnalytics(analytics, transactions) {
-        document.getElementById('total-transactions').textContent = transactions.length;
-        document.getElementById('avg-tx-amount').textContent = `${analytics.patterns.averageAmount.toLocaleString()} QU`;
-        document.getElementById('tx-frequency').textContent = `${analytics.patterns.frequency}/day`;
-        document.getElementById('current-tick').textContent = this.portfolioData?.networkStatus?.currentTick?.toLocaleString() || '-';
+        // Helper function to safely update element
+        const safeUpdate = (id, content) => {
+            const element = document.getElementById(id);
+            if (element) {
+                element.textContent = content;
+            }
+        };
+
+        safeUpdate('total-transactions', transactions.length);
+        safeUpdate('avg-tx-amount', `${analytics.patterns.averageAmount.toLocaleString()} QU`);
+        safeUpdate('tx-frequency', `${analytics.patterns.frequency}/day`);
+        safeUpdate('current-tick', this.portfolioData?.networkStatus?.currentTick?.toLocaleString() || '-');
     }
 
     /**
@@ -551,6 +597,7 @@ class QubicPortfolioApp {
      */
     updateInsights(insights) {
         const container = document.getElementById('portfolio-insights');
+        if (!container) return;
         
         if (!insights || insights.length === 0) {
             container.innerHTML = `
@@ -587,68 +634,98 @@ class QubicPortfolioApp {
      */
     updateEnhancedCharts(analytics, transactions) {
         setTimeout(() => {
-            // Real Balance Timeline
-            if (analytics.timeline.labels.length > 0) {
-                chartManager.getChart('enhanced-balance-chart', 'line', {
-                    labels: analytics.timeline.labels,
-                    datasets: [{
-                        label: 'QU Balance',
-                        data: analytics.timeline.balances,
-                        borderColor: '#667eea',
-                        backgroundColor: 'rgba(102, 126, 234, 0.1)',
-                        tension: 0.4,
-                        fill: true
-                    }]
-                }, {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: false,
-                            ticks: {
-                                callback: (value) => value.toLocaleString() + ' QU'
+            try {
+                // Real Balance Timeline
+                if (analytics.timeline.labels.length > 0 && document.getElementById('enhanced-balance-chart')) {
+                    chartManager.getChart('enhanced-balance-chart', 'line', {
+                        labels: analytics.timeline.labels,
+                        datasets: [{
+                            label: 'QU Balance',
+                            data: analytics.timeline.balances,
+                            borderColor: '#667eea',
+                            backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                            tension: 0.4,
+                            fill: true
+                        }]
+                    }, {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: false,
+                                ticks: {
+                                    callback: (value) => value.toLocaleString() + ' QU'
+                                }
                             }
+                        },
+                        plugins: {
+                            legend: { display: false }
                         }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                });
-            }
+                    });
+                }
 
-            // Asset Performance Chart
-            if (analytics.performance.length > 0) {
-                const performanceData = analytics.performance.slice(0, 8); // Top 8 assets
-                chartManager.getChart('asset-performance-chart', 'bar', {
-                    labels: performanceData.map(p => p.name),
-                    datasets: [{
-                        label: 'Asset Amount',
-                        data: performanceData.map(p => p.amount),
-                        backgroundColor: ['#667eea', '#764ba2', '#48bb78', '#ed8936', '#f56565', '#9f7aea', '#38b2ac', '#ed64a6']
-                    }]
-                }, {
-                    responsive: true,
-                    scales: {
-                        y: {
-                            beginAtZero: true,
-                            ticks: {
-                                callback: (value) => value.toLocaleString()
+                // Asset Performance Chart
+                if (analytics.performance.length > 0 && document.getElementById('asset-performance-chart')) {
+                    const performanceData = analytics.performance.slice(0, 8); // Top 8 assets
+                    chartManager.getChart('asset-performance-chart', 'bar', {
+                        labels: performanceData.map(p => p.name),
+                        datasets: [{
+                            label: 'Asset Amount',
+                            data: performanceData.map(p => p.amount),
+                            backgroundColor: ['#667eea', '#764ba2', '#48bb78', '#ed8936', '#f56565', '#9f7aea', '#38b2ac', '#ed64a6']
+                        }]
+                    }, {
+                        responsive: true,
+                        scales: {
+                            y: {
+                                beginAtZero: true,
+                                ticks: {
+                                    callback: (value) => value.toLocaleString()
+                                }
                             }
+                        },
+                        plugins: {
+                            legend: { display: false }
                         }
-                    },
-                    plugins: {
-                        legend: { display: false }
-                    }
-                });
-            }
+                    });
+                }
 
-            // Portfolio Distribution
-            if (this.assets.length > 0) {
-                chartManager.createAssetDistributionChart(this.assets.slice(0, 10));
-            }
+                // Portfolio Distribution
+                if (this.assets.length > 0 && document.getElementById('portfolio-distribution-chart')) {
+                    chartManager.getChart('portfolio-distribution-chart', 'pie', {
+                        labels: this.assets.slice(0, 10).map(a => a.name),
+                        datasets: [{
+                            data: this.assets.slice(0, 10).map(a => a.amount),
+                            backgroundColor: ['#667eea', '#764ba2', '#48bb78', '#ed8936', '#f56565', '#9f7aea', '#38b2ac', '#ed64a6', '#805ad5', '#d69e2e']
+                        }]
+                    }, {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'right' }
+                        }
+                    });
+                }
 
-            // Transaction Flow
-            if (transactions.length > 0) {
-                chartManager.createFlowChart(transactions);
+                // Transaction Flow
+                if (transactions.length > 0 && document.getElementById('transaction-flow-chart')) {
+                    const incoming = transactions.filter(tx => tx.type === 'incoming').length;
+                    const outgoing = transactions.filter(tx => tx.type === 'outgoing').length;
+                    
+                    chartManager.getChart('transaction-flow-chart', 'doughnut', {
+                        labels: ['Incoming', 'Outgoing'],
+                        datasets: [{
+                            data: [incoming, outgoing],
+                            backgroundColor: ['#48bb78', '#ed8936'],
+                            borderWidth: 0
+                        }]
+                    }, {
+                        responsive: true,
+                        plugins: {
+                            legend: { position: 'bottom' }
+                        }
+                    });
+                }
+            } catch (error) {
+                console.error('Error updating charts:', error);
             }
         }, 100);
     }
@@ -658,6 +735,7 @@ class QubicPortfolioApp {
      */
     updateTopCounterparties(counterparties) {
         const container = document.getElementById('top-counterparties');
+        if (!container) return;
         
         if (!counterparties || counterparties.length === 0) {
             container.innerHTML = '<div class="empty-state">No trading partners found</div>';
